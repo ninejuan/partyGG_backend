@@ -17,15 +17,11 @@ interface ChangeDesc {
 	newDesc: string;
 };
 
-interface Portfolio {
-	userId: number;
-	newPf: string;
-}
+interface Portfolio { newPf: string; };
 
 interface MyLink { // 사용자의 대표 웹사이트 설정
-	userId: number;
 	link: string;
-}
+};
 
 @ApiTags("Authentication")
 @Controller('auth')
@@ -70,14 +66,14 @@ export class AuthController {
 
 	@Patch('pf/did/:userId')
 	@UseGuards(AuthGuard)
-	async changePortfolio(@Body() bd: Portfolio) {
-		return await this.authService.updatePortfolio(bd.userId, bd.newPf);
+	async changePortfolio(@Body() bd: Portfolio, @Param('userId') uid: number) {
+		return await this.authService.updatePortfolio(uid, bd.newPf);
 	}
 
 	@Patch('pf/editlink/:userId')
 	@UseGuards(AuthGuard)
-	async editLink(@Body() bd: MyLink) {
-		return await this.authService.changeLink(bd.userId, bd.link);
+	async editLink(@Body() bd: MyLink, @Param('userId') uid: number) {
+		return await this.authService.changeLink(uid, bd.link);
 	}
 }
 

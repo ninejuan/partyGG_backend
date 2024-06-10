@@ -15,6 +15,7 @@ export class ArticleService {
       title: await checkXSSUtil(newArticleData.title),
       content: await checkXSSUtil(newArticleData.content),
       likes: [],
+      aType: await checkXSSUtil(newArticleData.aType),
       category: await checkXSSUtil(newArticleData.category),
       createdAt: Date.now(),
       editData: {
