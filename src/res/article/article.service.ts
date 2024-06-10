@@ -90,7 +90,7 @@ export class ArticleService {
   async getTopArticles(category: string, count: number) {
     const get = await articleSchema.find({
       aType: category
-    }).limit(count);
+    }).sort({ createdAt: -1 }).limit(count);
     return get;
   }
 }
