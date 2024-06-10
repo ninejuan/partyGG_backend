@@ -58,6 +58,18 @@ export class ArticleService {
     }
   }
 
+  async resume(articleId: number) {
+    const article = await articleSchema.findOne({
+      articleId: articleId
+    });
+    if (!article.isEnded) return false;
+    else {
+      article.isEnded = false;
+      await article.save();
+      return true;
+    }
+  }
+
   async getById(id: number) {
     if (isNaN(id)) return false;
     const res = await articleSchema.findOne({

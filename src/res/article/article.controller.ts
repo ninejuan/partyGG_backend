@@ -36,13 +36,21 @@ export class ArticleController {
     return this.articleService.remove(+id);
   }
 
-  @Get('end/:articleId')
+  @Post('end/:articleId')
   @UseGuards(MatchGuard)
   async end(
     @Param('articleId') aid: number
   ) {
     return await this.articleService.end(aid);
     // console.log(req);
+  }
+
+  @Post('resume/:articleId')
+  @UseGuards(MatchGuard)
+  async resume(
+    @Param('articleId') aid: number
+  ) {
+    return await this.articleService.resume(aid);
   }
 
   // 게시판 기본 로드 게시물 수는 20개로 제한.
