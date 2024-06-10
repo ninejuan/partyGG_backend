@@ -10,6 +10,7 @@ const articleSchema = new mongo.Schema({
     aType: { type: String, required: true },
     category: { type: String, required: true }, // IT, 디자인, 게임, 스터디, 기타
     createdAt: { type: Number, required: true }, // Date.now() 형식(ms type)
+    isEnded: { type: Boolean, default: false }
 })
 
 export default mongo.model('article', articleSchema);

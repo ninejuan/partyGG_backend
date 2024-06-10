@@ -46,6 +46,18 @@ export class ArticleService {
     });
   }
 
+  async end(articleId: number) { // 구인이나 구직을 마감함.
+    const article = await articleSchema.findOne({
+      articleId: articleId
+    });
+    if (article.isEnded) return false;
+    else {
+      article.isEnded = true;
+      await article.save();
+      return true;
+    }
+  }
+
   async getById(id: number) {
     if (isNaN(id)) return false;
     const res = await articleSchema.findOne({

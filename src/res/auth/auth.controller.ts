@@ -30,7 +30,7 @@ export class AuthController {
 		@Res() res: Response,
 	) {
 		res.cookie('pggtkn', userData.token, {
-			domain: `.${env.ROOT_DOMAIN}`,
+			// domain: `.${env.ROOT_DOMAIN}`,
 			expires: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 7),
 			sameSite: 'strict',
 			httpOnly: true

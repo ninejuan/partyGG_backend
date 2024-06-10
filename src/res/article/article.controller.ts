@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Put, Param, Delete, UseGuards, Injectable } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Put, Param, Delete, UseGuards, Injectable, Res, Req } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { GoogleAuthGuard } from '../auth/guards/google.guard';
 import { CallbackUserData } from '../auth/decorator/auth.decorator';
@@ -7,6 +7,8 @@ import Article from '../../interface/article.interface';
 import { ExecutionContext } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import checkXSS from 'src/utils/checkXSS.util';
+import { Response, Request } from 'express';
+import { MatchGuard } from '../auth/guards/authMatch.guard';
 
 @ApiTags("Article CRUD")
 @Controller('article')
@@ -34,6 +36,15 @@ export class ArticleController {
     return this.articleService.remove(+id);
   }
 
+  @Get('end/:articleId')
+  @UseGuards(MatchGuard)
+  async end(
+    @Param('articleId') aid: number
+  ) {
+    return await this.articleService.end(aid);
+    // console.log(req);
+  }
+
   // 게시판 기본 로드 게시물 수는 20개로 제한.
   // 공지는 모든 페이지에서 보이게 (관리자 대시보드 필요)
   /**
@@ -53,13 +64,13 @@ export class ArticleController {
     return await this.articleService.getById(+id);
   }
 
-  @Get('/lists/recent/:category/:page/:count')
+  @Get('lists/recent/:category/:page/:count')
   async getIdsByCount(@Param('category') ct: string, @Param('page') page: number, @Param('count') count?: number) {
     return await this.articleService.getIdsByCount(ct, page, count??20);
   }
 
   // 메인 페이지에서 로드할 글
-  @Get('/lists/recent/:category/:number')
+  @Get('lists/recent/:category/:number')
   async getRecent(@Param('category') ct: string, @Param('number') num: number) {
     return await this.articleService.getTopArticles(ct, num);
   }
