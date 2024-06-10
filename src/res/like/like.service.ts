@@ -19,6 +19,7 @@ export class LikeService {
         return false;
       });
     }
+    return true;
   }
 
   async remove(newLike: Like) {
@@ -37,5 +38,6 @@ export class LikeService {
         return false;
       });
     }
+    return true;
   }
 }
