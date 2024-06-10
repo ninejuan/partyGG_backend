@@ -63,7 +63,6 @@ export class ArticleController {
    * 만들어야 하는 controller
    * - View List(reqprm: page, category)
    * - View Article(reqprm: articleid, reqvalidate: auth)
-   * - 
    */
   
   @UseGuards(AuthGuard)

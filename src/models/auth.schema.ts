@@ -4,6 +4,8 @@ const authSchema = new mongo.Schema({
     pggId: { type: Number, required: true }, // url param에 사용 (content 시청 시)
     pggNick: { type: String },
     desc: { type: String }, // user description
+    portfolio: { type: String },
+    myLink: { type: String },
     providerData: {
         email: { type: String, required: true },
         name: { type: String, required: true },

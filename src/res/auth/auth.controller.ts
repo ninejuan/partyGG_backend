@@ -17,6 +17,16 @@ interface ChangeDesc {
 	newDesc: string;
 };
 
+interface Portfolio {
+	userId: number;
+	newPf: string;
+}
+
+interface MyLink { // 사용자의 대표 웹사이트 설정
+	userId: number;
+	link: string;
+}
+
 @ApiTags("Authentication")
 @Controller('auth')
 export class AuthController {
@@ -50,6 +60,24 @@ export class AuthController {
 	@Patch()
 	async changeDescription(@Body() newDesc: ChangeDesc) {
 		return this.authService.changeDesc(newDesc.pggId, newDesc.newDesc);
+	}
+
+	/**
+	 * Auth Controller에서 만들어야 하는 기능
+	 * 	- User Portfolio (근무 경력, 수상 경력, 재학 학교 등)
+	 * 	- 유저 깃허브, 포트폴리오 홈페이지 등 url 연결
+	 */
+
+	@Patch('pf/did/:userId')
+	@UseGuards(AuthGuard)
+	async changePortfolio(@Body() bd: Portfolio) {
+		return await this.authService.updatePortfolio(bd.userId, bd.newPf);
+	}
+
+	@Patch('pf/editlink/:userId')
+	@UseGuards(AuthGuard)
+	async editLink(@Body() bd: MyLink) {
+		return await this.authService.changeLink(bd.userId, bd.link);
 	}
 }
 

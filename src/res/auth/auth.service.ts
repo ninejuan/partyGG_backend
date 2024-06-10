@@ -47,4 +47,28 @@ export class AuthService {
         await user.save();
         return pggId;
     }
+
+    async updatePortfolio(userId: number, newPf: string) {
+        const user = await authSchema.findOne({
+            pggId: userId
+        });
+        if (!user) return false;
+        else {
+            user.portfolio = newPf;
+            await user.save();
+            return user.pggId;
+        }
+    }
+
+    async changeLink(userId: number, link: string) {
+        const user = await authSchema.findOne({
+            pggId: userId
+        });
+        if(!user) return false;
+        else {
+            user.myLink = link;
+            await user.save();
+            return user.pggId;
+        }
+    }
 }
