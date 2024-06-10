@@ -82,7 +82,7 @@ export class ArticleService {
   async getIdsByCount(category: string, page: number, count: number) {
     const get = await articleSchema.find({
       aType: category
-    }).skip((page-1)*count).limit(count);
+    }).sort({ createdAt: -1 }).skip((page-1)*count).limit(count);
     return get;
   }
 
