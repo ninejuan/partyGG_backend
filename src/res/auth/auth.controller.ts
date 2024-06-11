@@ -44,6 +44,11 @@ export class AuthController {
 		res.redirect('/');
 	}
 
+	@Get('user/:pggId')
+	async getUserData(@Param('pggId') uid: number) {
+		return await this.authService.getUserData(uid);
+	}
+
 	@ApiExcludeEndpoint()
 	@UseGuards(AuthGuard)
 	@Patch('change/nick/:pggId/:newNick')

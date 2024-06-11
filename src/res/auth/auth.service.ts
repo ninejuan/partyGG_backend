@@ -15,6 +15,17 @@ import checkXSS from 'src/utils/checkXSS.util';
 
 @Injectable()
 export class AuthService {
+    async getUserData(userId: number) {
+        const user = await authSchema.findOne({
+            pggId: userId
+        });
+        if (!user) return false;
+        else {
+            return user;
+        }
+        return false;
+    }
+
     async deleteUser(pggId: Number, provider: string, email: string, uid: string) { // DELETE Method
         await authSchema.deleteOne({
             pggId: pggId,
