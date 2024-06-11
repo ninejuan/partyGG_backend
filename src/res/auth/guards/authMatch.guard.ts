@@ -37,7 +37,8 @@ export class MatchGuard implements CanActivate {
     if (article.writerId !== token.pggId) {
       alert("글쓴이만 이 공고를 마감할 수 있습니다.");
       return false;
-    } 
+    }
+    request.uid = token.pggId;
     return true;
   }
 }

@@ -67,8 +67,12 @@ export class ArticleController {
   
   @UseGuards(AuthGuard)
   @Get(':id')
-  async findOne(@Param('id') id: number) {
-    return await this.articleService.getById(+id);
+  async findOne(
+    @Param('id') aid: number,
+    @Req() req
+  ) {
+    await this.articleService.applyView(aid, req.uid);
+    return await this.articleService.getById(+aid);
   }
 
   @Get('lists/recent/:category/:page/:count')

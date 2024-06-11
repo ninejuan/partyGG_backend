@@ -93,4 +93,17 @@ export class ArticleService {
     }).sort({ createdAt: -1 }).limit(count);
     return get;
   }
+
+  async applyView(articleId: number, userid: number) {
+    const article = await articleSchema.findOne({
+      articleId: articleId
+    });
+    const index = article.views.indexOf(userid);
+    if (index) return null;
+    else {
+      article.views.unshift(userid);
+      await article.save();
+    }
+    return userid;
+  }
 }

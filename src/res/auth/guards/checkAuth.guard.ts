@@ -1,5 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Observable } from 'rxjs';
+import tokendataSchema from 'src/models/tokendata.schema';
 
 async function getPggTkn(headers) {
   let cIndex = headers.indexOf('Cookie');
@@ -7,7 +8,7 @@ async function getPggTkn(headers) {
     let cookie = headers[cIndex + 1];
     const match = cookie.match(/pggtkn=([^;]+)/);
     if (match) {
-      return cookie;
+      return `${cookie}`.slice(7);
     }
   }
   return null;
@@ -15,9 +16,9 @@ async function getPggTkn(headers) {
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  canActivate(
+  async canActivate(
     context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  ): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
     let pggTkn = getPggTkn(request.rawHeaders)
@@ -25,6 +26,10 @@ export class AuthGuard implements CanActivate {
       response.redirect('/auth/google/cb');
       return false;
     }
+    const tknData = await tokendataSchema.findOne({
+      token: pggTkn
+    });
+    request.uid = tknData.pggId;
     return true;
   }
 }
