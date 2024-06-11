@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import articleSchema from '../../models/article/article.schema';
 import Article from '../../interface/article.interface';
+import Notice from '../../interface/notice.interface';
 import genAIdUtil from 'src/utils/genArticleId.util';
+import genNIdUtil from 'src/utils/genNoticeId.util';
 import checkXSSUtil from 'src/utils/checkXSS.util';
 import * as crypto from 'crypto';
+import noticeSchema from 'src/models/article/notice.schema';
 
 @Injectable()
 export class ArticleService {
@@ -16,7 +19,6 @@ export class ArticleService {
       content: await checkXSSUtil(newArticleData.content),
       likes: [],
       aType: await checkXSSUtil(newArticleData.aType),
-      category: await checkXSSUtil(newArticleData.category),
       createdAt: Date.now(),
       editData: {
         isEdited: false
@@ -105,5 +107,36 @@ export class ArticleService {
       await article.save();
     }
     return userid;
+  }
+
+  async getNoticesByCount(count: number) {
+    const get = await noticeSchema.find()
+      .sort({ createdAt: -1 }).limit(count);
+    return get;
+  }
+
+  async writeNotice(newNotice: Notice) {
+    const arid = await genNIdUtil();
+    await new noticeSchema({
+      writerId: newNotice.writerId,
+      articleId: arid,
+      title: newNotice.title,
+      content: newNotice.content,
+      likes: [],
+      views: [],
+      createdAt: Date.now()
+    }).save();
+    return arid;
+  }
+
+  async editNotice(notice: Notice) {
+    await noticeSchema.findOneAndUpdate({
+      articleId: notice.articleId
+    }, notice).then(() => {
+      return notice.articleId;
+    }).catch((e) => {
+      console.error(e);
+      return false;
+    });
   }
 }

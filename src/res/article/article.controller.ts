@@ -4,6 +4,7 @@ import { GoogleAuthGuard } from '../auth/guards/google.guard';
 import { CallbackUserData } from '../auth/decorator/auth.decorator';
 import { AuthGuard } from '../auth/guards/checkAuth.guard';
 import Article from '../../interface/article.interface';
+import Notice from '../../interface/notice.interface';
 import { ExecutionContext } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import checkXSS from 'src/utils/checkXSS.util';
@@ -26,7 +27,6 @@ export class ArticleController {
   async update(@Param('id') id: number, @Body() updateData: Article) {
     updateData.title = (await checkXSS(updateData.title)).toString() ?? null;
     updateData.content = (await checkXSS(updateData.content)).toString();
-    updateData.category = (await checkXSS(updateData.category)).toString();
     return this.articleService.update(+id, updateData);
   }
 
@@ -84,5 +84,21 @@ export class ArticleController {
   @Get('lists/recent/:category/:number')
   async getRecent(@Param('category') ct: string, @Param('number') num: number) {
     return await this.articleService.getTopArticles(ct, num);
+  }
+
+  @Post('notice')
+  async createNotices(@Body() newNotice: Notice) {
+    return await this.articleService.writeNotice(newNotice);
+  }
+
+  // 공지글만 따로 로드
+  @Get('notice/:count')
+  async getNotices(@Param('count') count: number) {
+    return await this.articleService.getNoticesByCount(count);
+  }
+
+  @Put('notice')
+  async editNotice(@Body() notice: Notice) {
+    return await this.articleService.editNotice(notice);
   }
 }
