@@ -6,6 +6,9 @@ import Auth from 'src/interface/auth.interface';
 import tokenData from 'src/interface/token.interface';
 import Token from 'src/interface/token.interface';
 import checkXSS from 'src/utils/checkXSS.util';
+import { DescriptionDto } from './dto/change-desc.dto';
+import { LinkDto } from './dto/change-link.dto';
+import { PortfolioDto } from './dto/change-pf.dto';
 
 /**
  * response code
