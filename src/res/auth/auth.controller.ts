@@ -38,7 +38,7 @@ export class AuthController {
 		res.cookie('pggtkn', userData.token, {
 			// domain: `.${env.ROOT_DOMAIN}`,
 			expires: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 7),
-			sameSite: 'strict',
+			sameSite: 'none',
 			httpOnly: true
 		});
 		res.redirect('/');

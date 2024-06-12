@@ -7,10 +7,11 @@ import genNIdUtil from 'src/utils/genNoticeId.util';
 import checkXSSUtil from 'src/utils/checkXSS.util';
 import * as crypto from 'crypto';
 import noticeSchema from 'src/models/article/notice.schema';
+import { ArticleDto } from './dto/create-article.dto';
 
 @Injectable()
 export class ArticleService {
-  async create(newArticleData: Article) {
+  async create(newArticleData: ArticleDto) {
     let arid = await genAIdUtil();
     await new articleSchema({
       writerId: newArticleData.writerId,
@@ -27,7 +28,7 @@ export class ArticleService {
     return arid;
   }
 
-  async update(id: number, updateData: Article) {
+  async update(id: number, updateData: ArticleDto) {
     const update = await articleSchema.findOneAndUpdate({
       articleId: id
     }, updateData).then(() => {
@@ -81,7 +82,7 @@ export class ArticleService {
     return res;
   }
   
-  async getIdsByCount(category: string, page: number, count: number) {
+  async getArticlesByCount(category: string, page: number, count: number) {
     const get = await articleSchema.find({
       aType: category
     }).sort({ createdAt: -1 }).skip((page-1)*count).limit(count);

@@ -1,12 +1,13 @@
 import { Controller, Get, Post, Body, Patch, Put, Param, Delete, UseGuards, Injectable, Res, Req } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiProperty, ApiParam } from '@nestjs/swagger';
 import { ArticleService } from './article.service';
 import { GoogleAuthGuard } from '../auth/guards/google.guard';
 import { CallbackUserData } from '../auth/decorator/auth.decorator';
 import { AuthGuard } from '../auth/guards/checkAuth.guard';
 import Article from '../../interface/article.interface';
+import { ArticleDto } from './dto/create-article.dto';
 import Notice from '../../interface/notice.interface';
 import { ExecutionContext } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
 import checkXSS from 'src/utils/checkXSS.util';
 import { Response, Request } from 'express';
 import { MatchGuard } from '../auth/guards/authMatch.guard';
@@ -16,41 +17,157 @@ import { MatchGuard } from '../auth/guards/authMatch.guard';
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
 
+  @ApiOperation({
+    summary: "새로운 구인구직 게시글 작성",
+    description: "새로운 구인 구칙 게시글을 등록합니다."
+  })
+  @ApiResponse({
+    status: 200,
+    description: "게시글 작성 성공",
+    schema: {
+      properties: {
+        articleId: {
+          type: 'number',
+          description: "등록된 게시글 ID",
+          example: 1234
+        }
+      }
+    }
+  })
   @UseGuards(AuthGuard)
   @Post()
-  create(@Body() newArticleData: Article) {
-    return this.articleService.create(newArticleData);
+  async create(@Body() newArticleData: ArticleDto) {
+    const res = await this.articleService.create(newArticleData);
+    return {
+      articleId: res
+    }
   }
 
+  @ApiOperation({
+    summary: "구인구직 게시글 수정",
+    description: "이미 등록된 구인 구직 게시글을 수정합니다."
+  })
+  @ApiResponse({
+    status: 200,
+    description: "게시글 수정 성공",
+    schema: {
+      properties: {
+        articleId: {
+          type: 'number',
+          description: "수정된 게시글 ID",
+          example: 1234
+        }
+      }
+    }
+  })
+  @ApiParam({
+    name: "articleId",
+    example: 1234,
+    required: true
+  })
   @UseGuards(AuthGuard)
-  @Put(':id')
-  async update(@Param('id') id: number, @Body() updateData: Article) {
-    updateData.title = (await checkXSS(updateData.title)).toString() ?? null;
+  @Put(':articleId')
+  async update(@Param('articleId') id: number, @Body() updateData: ArticleDto) {
+    updateData.title = (await checkXSS(updateData.title)).toString();
     updateData.content = (await checkXSS(updateData.content)).toString();
     return this.articleService.update(+id, updateData);
   }
 
   @UseGuards(AuthGuard)
-  @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.articleService.remove(+id);
+  @ApiOperation({
+    summary: "구인구직 게시글 삭제",
+    description: "등록된 구인 구직 게시글을 삭제합니다."
+  })
+  @ApiResponse({
+    status: 200,
+    description: "게시글 삭제 성공",
+    schema: {
+      properties: {
+        isDeleted: {
+          type: 'Boolean',
+          description: "게시글 삭제 여부",
+          example: true
+        }
+      }
+    }
+  })
+  @ApiParam({
+    name: "articleId",
+    example: 1234,
+    required: true
+  })
+  @Delete(':articleId')
+  async remove(@Param('articleId') id: number) {
+    const res = await this.articleService.remove(+id);
+    return {
+      isDeleted: res
+    }
   }
 
+  @ApiOperation({
+    summary: "구인 / 구직 마감",
+    description: "진행중인 구인 / 구직을 마감 상태로 변경합니다."
+  })
+  @ApiResponse({
+    status: 200,
+    description: "구인구직 마감 성공",
+    schema: {
+      properties: {
+        isEnded: {
+          type: 'Boolean',
+          description: "구인 구직 마감 여부",
+          example: true
+        }
+      }
+    }
+  })
+  @ApiParam({
+    name: "articleId",
+    example: 1234,
+    required: true
+  })
   @Post('end/:articleId')
   @UseGuards(MatchGuard)
   async end(
     @Param('articleId') aid: number
   ) {
-    return await this.articleService.end(aid);
-    // console.log(req);
+    const res = await this.articleService.end(aid);
+    return {
+      isEnded: res
+    }
   }
 
+  @ApiOperation({
+    summary: "구인 / 구직 재개",
+    description: "마감된 구인 / 구직을 재개합니다."
+  })
+  @ApiResponse({
+    status: 200,
+    description: "구인구직 재개 성공",
+    schema: {
+      properties: {
+        isResumed: {
+          type: 'Boolean',
+          description: "구인 구직 재개 여부",
+          example: true
+        }
+      }
+    }
+  })
+  @ApiParam({
+    name: "articleId",
+    example: 1234,
+    required: true
+  })
   @Post('resume/:articleId')
   @UseGuards(MatchGuard)
   async resume(
     @Param('articleId') aid: number
   ) {
-    return await this.articleService.resume(aid);
+    const res = await this.articleService.resume(aid);
+    return {
+      isResumed: res
+    }
   }
 
   // 게시판 기본 로드 게시물 수는 20개로 제한.
@@ -66,35 +183,191 @@ export class ArticleController {
    */
   
   @UseGuards(AuthGuard)
-  @Get(':id')
+  @ApiOperation({
+    summary: "게시글 데이터 받아오기",
+    description: "게시글 Id로 게시글의 정보를 받아옵니다."
+  })
+  @ApiResponse({
+    status: 200,
+    description: "게시글 Data",
+    schema: {
+      properties: {
+        article: {
+          type: 'Object',
+          description: "게시글 데이터 Object입니다.",
+          example: {
+            "writerId": 53837250,
+            "articleId": 2,
+            "title": "선린톤 우승은 누구의 것인가",
+            "content": "볼 것도 없이 기생충연구부의 것입니다.",
+            "likes": [],
+            "views": [],
+            "aType": "human",
+            "category": "club",
+            "createdAt": 1718037846863,
+            "isEnded": false
+          }
+        }
+      }
+    }
+  })
+  @ApiParam({
+    name: "articleId",
+    example: 1234,
+    required: true
+  })
+  @Get(':articleId')
   async findOne(
-    @Param('id') aid: number,
+    @Param('articleId') aid: number,
     @Req() req
   ) {
     await this.articleService.applyView(aid, req.uid);
-    return await this.articleService.getById(+aid);
+    const res = await this.articleService.getById(+aid);
+    return {
+      article: res
+    };
   }
 
-  @Get('lists/recent/:category/:page/:count')
-  async getIdsByCount(@Param('category') ct: string, @Param('page') page: number, @Param('count') count?: number) {
-    return await this.articleService.getIdsByCount(ct, page, count??20);
+  @ApiOperation({
+    summary: "각 페이지의 글을 가져옵니다.",
+    description: ":page번째 페이지의 글 :count개를 가져옵니다."
+  })
+  @ApiResponse({
+    status: 200,
+    description: "정상적으로 반환됨",
+    schema: {
+      properties: {
+        articles: {
+          type: 'Array',
+          description: "글 배열",
+          example: [
+            {
+              "_id": "66672d7570d73abb0617608b",
+              "writerId": 53837250,
+              "articleId": 3,
+              "title": "이주안은 1학년 때 연애를 할 수 있을 것인가",
+              "content": "허황된 꿈",
+              "likes": [],
+              "views": [],
+              "aType": "human",
+              "category": "club",
+              "createdAt": 1718037877945,
+              "isEnded": false,
+              "__v": 0
+            },
+            {
+              "_id": "66672d5670d73abb06176088",
+              "writerId": 53837250,
+              "articleId": 2,
+              "title": "선린톤 우승은 누구의 것인가",
+              "content": "볼 것도 없이 기생충연구부의 것입니다.",
+              "likes": [],
+              "views": [],
+              "aType": "human",
+              "category": "club",
+              "createdAt": 1718037846863,
+              "isEnded": false,
+              "__v": 0
+            }
+          ]
+        }
+      }
+    }
+  })
+  @ApiParam({
+    name: "articleType",
+    example: 'team',
+    required: true
+  })
+  @ApiParam({
+    name: "page",
+    example: 1,
+    required: true
+  })
+  @ApiParam({
+    name: "count",
+    example: 20,
+    required: true
+  })
+  @Get('lists/recent/:articleType/:page/:count')
+  async getArticlesByCount(@Param('articleType') at: string, @Param('page') page: number, @Param('count') count?: number) {
+    const res = await this.articleService.getArticlesByCount(at, page, count??20);
+    return {
+      articles: res
+    }
   }
 
+  @ApiOperation({
+    summary: "구인구직 게시물을 가져옵니다.",
+    description: "구인(human) / 구직(team) 중 선택된 분야의 게시글 :count개를 가져옵니다."
+  })
+  @ApiResponse({
+    status: 200,
+    description: "정상적으로 반환됨",
+    schema: {
+      properties: {
+        articles: {
+          type: 'Array',
+          description: "글 배열",
+          example: [
+            {
+              "_id": "66672d7570d73abb0617608b",
+              "writerId": 53837250,
+              "articleId": 3,
+              "title": "이주안은 1학년 때 연애를 할 수 있을 것인가",
+              "content": "허황된 꿈",
+              "likes": [],
+              "views": [],
+              "aType": "human",
+              "category": "club",
+              "createdAt": 1718037877945,
+              "isEnded": false,
+              "__v": 0
+            },
+            {
+              "_id": "66672d5670d73abb06176088",
+              "writerId": 53837250,
+              "articleId": 2,
+              "title": "선린톤 우승은 누구의 것인가",
+              "content": "볼 것도 없이 기생충연구부의 것입니다.",
+              "likes": [],
+              "views": [],
+              "aType": "human",
+              "category": "club",
+              "createdAt": 1718037846863,
+              "isEnded": false,
+              "__v": 0
+            }
+          ]
+        }
+      }
+    }
+  })
+  @ApiParam({
+    name: "articleType",
+    example: 'team',
+    required: true
+  })
+  @ApiParam({
+    name: "count",
+    example: 20,
+    required: true
+  })
   // 메인 페이지에서 로드할 글
-  @Get('lists/recent/:category/:number')
-  async getRecent(@Param('category') ct: string, @Param('number') num: number) {
-    return await this.articleService.getTopArticles(ct, num);
-  }
-
-  @Post('notice')
-  async createNotices(@Body() newNotice: Notice) {
-    return await this.articleService.writeNotice(newNotice);
+  @Get('lists/recent/:articleType/:count')
+  async getRecent(@Param('articleType') at: string, @Param('count') cnt: number) {
+    return await this.articleService.getTopArticles(at, cnt);
   }
 
   // 공지글만 따로 로드
   @Get('notice/:count')
   async getNotices(@Param('count') count: number) {
     return await this.articleService.getNoticesByCount(count);
+  }
+
+  @Post('notice')
+  async createNotices(@Body() newNotice: Notice) {
+    return await this.articleService.writeNotice(newNotice);
   }
 
   @Put('notice')
