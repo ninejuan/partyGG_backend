@@ -1,17 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import Like from 'src/interface/like.interface';
 import articleSchema from 'src/models/article/article.schema';
 
 @Injectable()
 export class LikeService {
-  async add(newLike: Like) {
+  async add(userId: number, articleId: number) {
     const article = await articleSchema.findOne({
-      articleId: newLike.articleId
+      articleId: articleId
     });
-    if (article.likes.indexOf(newLike.likerId) >= 0) {
+    if (article.likes.indexOf(userId) >= 0) {
       return false;
     } else {
-      article.likes[article.likes.length] = newLike.likerId;
+      article.likes[article.likes.length] = userId;
       await article.save().then(() => {
         return true;
       }).catch((e) => {
@@ -22,14 +21,14 @@ export class LikeService {
     return true;
   }
 
-  async remove(newLike: Like) {
+  async remove(userId: number, articleId: number) {
     const article = await articleSchema.findOne({
-      articleId: newLike.articleId
+      articleId: articleId
     });
-    if (article.likes.indexOf(newLike.likerId) == -1) {
+    if (article.likes.indexOf(userId) == -1) {
       return false;
     } else {
-      let i = article.likes.indexOf(newLike.likerId);
+      let i = article.likes.indexOf(userId);
       article.likes.splice(i, 1);
       await article.save().then(() => {
         return true;

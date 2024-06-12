@@ -1,6 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { LikeService } from './like.service';
-import Like from 'src/interface/like.interface';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/guards/checkAuth.guard';
 
@@ -9,15 +8,15 @@ import { AuthGuard } from '../auth/guards/checkAuth.guard';
 export class LikeController {
   constructor(private readonly likeService: LikeService) {}
 
-  @Post()
+  @Post(':userId/:articleId')
   @UseGuards(AuthGuard)
-  async add(@Body() newLike: Like) {
-    return this.likeService.add(newLike);
+  async add(@Param('userId') uid: number, @Param('articleId') aid: number) {
+    return this.likeService.add(uid, aid);
   }
 
-  @Delete()
+  @Delete(':userId/:articleId')
   @UseGuards(AuthGuard)
-  async remove(@Body() newLike: Like) {
-    return this.likeService.remove(newLike);
+  async remove(@Param('userId') uid: number, @Param('articleId') aid: number) {
+    return this.likeService.remove(uid, aid);
   }
 }

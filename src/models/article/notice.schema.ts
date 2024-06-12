@@ -5,7 +5,6 @@ const noticeSchema = new mongo.Schema({
     articleId: { type: String, required: true },
     title: { type: String, required: true },
     content: { type: String, required: true },
-    likes: { type: Array, required: true }, // String Data, `${user_id}`
     views: { type: Array, required: true }, // String Data, `${user_id}`
     createdAt: { type: Number, required: true }, // Date.now() 형식(ms type)
 })

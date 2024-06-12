@@ -96,7 +96,7 @@ export class ArticleService {
     return get;
   }
 
-  async applyView(articleId: number, userid: number) {
+  async applyView(articleId: any, userid: number) {
     const article = await articleSchema.findOne({
       articleId: articleId
     });
@@ -122,7 +122,6 @@ export class ArticleService {
       articleId: `N${arid}`,
       title: newNotice.title,
       content: newNotice.content,
-      likes: [],
       views: [],
       createdAt: Date.now()
     }).save();
@@ -139,7 +138,6 @@ export class ArticleService {
       articleId: articleId,
       title: notice.title,
       content: notice.content,
-      likes: article.likes,
       views: article.views,
       createdAt: article.createdAt
     }).then(() => {
