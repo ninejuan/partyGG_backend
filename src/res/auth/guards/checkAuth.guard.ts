@@ -21,7 +21,7 @@ export class AuthGuard implements CanActivate {
   ): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
-    let pggTkn = getPggTkn(request.rawHeaders)
+    let pggTkn = await getPggTkn(request.rawHeaders)
     if (!pggTkn) {
       response.redirect('/auth/google/cb');
       return false;
