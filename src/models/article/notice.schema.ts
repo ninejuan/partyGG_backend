@@ -2,7 +2,7 @@ import mongo from 'mongoose';
 
 const noticeSchema = new mongo.Schema({
     writerId: { type: Number, required: true }, // writer's pggId
-    articleId: { type: Number, required: true },
+    articleId: { type: String, required: true },
     title: { type: String, required: true },
     content: { type: String, required: true },
     likes: { type: Array, required: true }, // String Data, `${user_id}`

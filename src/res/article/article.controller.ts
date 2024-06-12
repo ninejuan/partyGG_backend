@@ -4,9 +4,8 @@ import { ArticleService } from './article.service';
 import { GoogleAuthGuard } from '../auth/guards/google.guard';
 import { CallbackUserData } from '../auth/decorator/auth.decorator';
 import { AuthGuard } from '../auth/guards/checkAuth.guard';
-import Article from '../../interface/article.interface';
-import { ArticleDto } from './dto/create-article.dto';
-import Notice from '../../interface/notice.interface';
+import { ArticleDto } from './dto/article.dto';
+import { NoticeDto } from './dto/notice.dto';
 import { ExecutionContext } from '@nestjs/common';
 import checkXSS from 'src/utils/checkXSS.util';
 import { Response, Request } from 'express';
@@ -70,7 +69,10 @@ export class ArticleController {
   async update(@Param('articleId') id: number, @Body() updateData: ArticleDto) {
     updateData.title = (await checkXSS(updateData.title)).toString();
     updateData.content = (await checkXSS(updateData.content)).toString();
-    return this.articleService.update(+id, updateData);
+    const res = await this.articleService.update(+id, updateData);
+    return {
+      articleId: res
+    }
   }
 
   @UseGuards(AuthGuard)
@@ -359,19 +361,98 @@ export class ArticleController {
     return await this.articleService.getTopArticles(at, cnt);
   }
 
+  @ApiOperation({
+    summary: "공지글을 가져옵니다.",
+    description: "공지글 :count개를 가져옵니다."
+  })
+  @ApiResponse({
+    status: 200,
+    description: "정상적으로 반환됨",
+    schema: {
+      properties: {
+        articles: {
+          type: 'Array',
+          description: "공지글 배열",
+          example: [
+            {
+              "_id": "6669ba80d186bc44a2de080a",
+              "writerId": 34726863,
+              "articleId": "N3",
+              "title": "[업데이트] 20240613 패치노트",
+              "content": "글 수정 기능이 추가되고, 조금의 숙면이 추가되었습니다.",
+              "likes": [],
+              "views": [],
+              "createdAt": 1718205056204,
+              "__v": 0
+            }
+          ]
+        }
+      }
+    }
+  })
+  @ApiParam({
+    name: "count",
+    example: 1,
+    required: true
+  })
   // 공지글만 따로 로드
   @Get('notice/:count')
   async getNotices(@Param('count') count: number) {
-    return await this.articleService.getNoticesByCount(count);
+    const res = await this.articleService.getNoticesByCount(count);
+    return {
+      article: res
+    }
   }
 
+  @ApiOperation({
+    summary: "공지글 작성",
+    description: "새로운 공지글을 등록합니다."
+  })
+  @ApiResponse({
+    status: 200,
+    description: "공지 업로드 성공",
+    schema: {
+      properties: {
+        articleId: {
+          type: 'string',
+          description: "등록된 공지글 ID",
+          example: 'N1'
+        }
+      }
+    }
+  })
   @Post('notice')
-  async createNotices(@Body() newNotice: Notice) {
+  async createNotices(@Body() newNotice: NoticeDto) {
     return await this.articleService.writeNotice(newNotice);
   }
 
-  @Put('notice')
-  async editNotice(@Body() notice: Notice) {
-    return await this.articleService.editNotice(notice);
+  @ApiOperation({
+    summary: "공지글 수정",
+    description: "등록된 공지글을 수정합니다."
+  })
+  @ApiResponse({
+    status: 200,
+    description: "공지 수정 성공",
+    schema: {
+      properties: {
+        articleId: {
+          type: 'string',
+          description: "수정된 공지글 ID",
+          example: 'N3'
+        }
+      }
+    }
+  })
+  @ApiParam({
+    name: "articleId",
+    example: 'N3',
+    required: true
+  })
+  @Put('notice/:articleId')
+  async editNotice(@Param('articleId') aid: string, @Body() notice: NoticeDto) {
+    const res = await this.articleService.editNotice(aid, notice);
+    return {
+      articleId: res
+    }
   }
 }

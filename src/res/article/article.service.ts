@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import articleSchema from '../../models/article/article.schema';
-import Article from '../../interface/article.interface';
-import Notice from '../../interface/notice.interface';
 import genAIdUtil from 'src/utils/genArticleId.util';
 import genNIdUtil from 'src/utils/genNoticeId.util';
 import checkXSSUtil from 'src/utils/checkXSS.util';
 import * as crypto from 'crypto';
 import noticeSchema from 'src/models/article/notice.schema';
-import { ArticleDto } from './dto/create-article.dto';
+import { ArticleDto } from './dto/article.dto';
+import { NoticeDto } from './dto/notice.dto';
 
 @Injectable()
 export class ArticleService {
@@ -116,11 +115,11 @@ export class ArticleService {
     return get;
   }
 
-  async writeNotice(newNotice: Notice) {
+  async writeNotice(newNotice: NoticeDto) {
     const arid = await genNIdUtil();
     await new noticeSchema({
       writerId: newNotice.writerId,
-      articleId: arid,
+      articleId: `N${arid}`,
       title: newNotice.title,
       content: newNotice.content,
       likes: [],
@@ -130,11 +129,21 @@ export class ArticleService {
     return arid;
   }
 
-  async editNotice(notice: Notice) {
-    await noticeSchema.findOneAndUpdate({
-      articleId: notice.articleId
-    }, notice).then(() => {
-      return notice.articleId;
+  async editNotice(articleId: string, notice: NoticeDto) {
+    const article = await noticeSchema.findOne({
+      articleId: articleId
+    });
+    if (!article) return false;
+    await article.updateOne({
+      writerId: notice.writerId,
+      articleId: articleId,
+      title: notice.title,
+      content: notice.content,
+      likes: article.likes,
+      views: article.views,
+      createdAt: article.createdAt
+    }).then(() => {
+      return articleId;
     }).catch((e) => {
       console.error(e);
       return false;
